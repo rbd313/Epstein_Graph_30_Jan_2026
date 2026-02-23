@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epstein Network Knowledge Graph - Interactive Views</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            color: #999;
+            font-size: 1.1em;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #333;
+        }
+        .nav-tab {
+            padding: 12px 20px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-bottom: none;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border-radius: 4px 4px 0 0;
+        }
+        .nav-tab:hover {
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .view-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .view-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .graph-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+        iframe {
+            width: 100%;
+            height: 700px;
+            border: none;
+        }
+        .description {
+            background: #222;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .description h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .description p {
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        .nodes-list {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            border: 1px solid #333;
+        }
+        .nodes-list strong {
+            color: #667eea;
+        }
+        .nodes-list ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .nodes-list li {
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: #222;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.8em;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .stat-label {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+        }
+        .color-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🕸️ Epstein Network Knowledge Graph</h1>
+            <p class="subtitle">Interactive visualization of 25,793 documents, 2,669 entities, 105 core network nodes</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showView('full')">📊 Full Graph</button>
+            <button class="nav-tab" onclick="showView('academia')">🎓 Academia</button>
+            <button class="nav-tab" onclick="showView('finance')">💰 Finance</button>
+            <button class="nav-tab" onclick="showView('entertainment')">🎭 Entertainment</button>
+            <button class="nav-tab" onclick="showView('israeli')">🇮🇱 Israeli Officials</button>
+        </div>
+
+        <!-- FULL GRAPH VIEW -->
+        <div id="view-full" class="view-content active">
+            <div class="description">
+                <h2>The Complete Ecosystem</h2>
+                <p><strong>105 nodes, 587 edges.</strong> This is the full network showing all interconnected parties across the corpus. Each node is a person, each edge represents co-mention in documents.</p>
+                <p><strong>Colors:</strong> Hot pink = Epstein Core | Cyan = Israeli Officials | Purple-Blue = Academia | Teal = Finance | Amber = Entertainment</p>
+                <p><strong>Insurance Principle:</strong> Exposure mapping. Just as insurers assess portfolio concentration risk, this view shows where your exposure clusters and what happens if one node is compromised.</p>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">105</div>
+                    <div class="stat-label">Total Nodes</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">587</div>
+                    <div class="stat-label">Connections</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">25,793</div>
+                    <div class="stat-label">Documents</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">13</div>
+                    <div class="stat-label">Role Types</div>
+                </div>
+            </div>
+            <div class="color-legend">
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #E84393;"></div>
+                    <span>Epstein Core (9)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #00E5FF;"></div>
+                    <span>Israeli Official (7)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #7C4DFF;"></div>
+                    <span>Academia (18)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #00ACC1;"></div>
+                    <span>Finance (14)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #FFB300;"></div>
+                    <span>Entertainment (7)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #EF6C00;"></div>
+                    <span>US Connected (15)</span>
+                </div>
+            </div>
+            <div class="graph-container">
+                <iframe src="https://hub.graphistry.com/graph/graph.html?dataset=ca0779badd914b359ba8b659c9d4a5c5&type=arrow&theme=dark&info=true&play=2000&pointLabelFontSize=14&edgeOpacity=0.6&edgeCurvature=0.15&showArrows=True&strongGravity=True&lockedR=True&pointsOfInterestMax=10"></iframe>
+            </div>
+        </div>
+
+        <!-- ACADEMIA VIEW -->
+        <div id="view-academia" class="view-content">
+            <div class="description">
+                <h2>Academia Network (18 Nodes)</h2>
+                <p><strong>The intellectual layer.</strong> Scientists, philosophers, legal scholars, and researchers connected through Epstein and each other.</p>
+                <p><strong>Insurance Principle:</strong> Reputation cascade & institutional risk. When one academic is compromised, all connected institutions face reputational damage—universities, research foundations, advisory boards.</p>
+                <p><strong>Key insight:</strong> Most nodes are NOT directly connected—they're connected THROUGH Epstein as a hub. When the hub fails, the entire network's credibility is questioned.</p>
+            </div>
+            <div class="nodes-list">
+                <strong>Nodes:</strong>
+                <ul>
+                    <li>Alan Dershowitz (950 docs) — Legal defense</li>
+                    <li>Stephen Hawking, Steven Pinker, Noam Chomsky</li>
+                    <li>Daniel Kahneman (Nobel laureate)</li>
+                    <li>Lawrence Krauss, Richard Dawkins, Roger Penrose</li>
+                    <li>Martin Nowak, Robert Trivers, Murray Gell-Mann</li>
+                    <li>Marvin Minsky, Joi Ito, Ray Kurzweil</li>
+                    <li>Stuart Pivar, Gerald Edelman, Lisa Randall</li>
+                </ul>
+            </div>
+            <div class="graph-container">
+                <iframe src="https://hub.graphistry.com/graph/graph.html?dataset=0d0f0c5649c846609354d4cc62fa5161&type=arrow&theme=dark&info=true&play=2000&pointLabelFontSize=14&edgeOpacity=0.6&edgeCurvature=0.15&showArrows=True&strongGravity=True"></iframe>
+            </div>
+        </div>
+
+        <!-- FINANCE VIEW -->
+        <div id="view-finance" class="view-content">
+            <div class="description">
+                <h2>Finance Network (14 Nodes)</h2>
+                <p><strong>The wealth layer.</strong> Billionaires, hedge fund titans, investment managers, and money controllers. Lloyd Blankfein (Goldman Sachs), Ray Dalio (Bridgewater), Bill Gates, Peter Thiel, and others.</p>
+                <p><strong>Insurance Principle:</strong> Fraud detection & asset concentration risk. When ultra-wealthy figures cluster in the same corpus, it signals unusual deal flow, potentially opaque vehicles, and systemic failure points.</p>
+                <p><strong>Key insight:</strong> Epstein managed wealth for Wexner ($15B+). The finance network shows how one wealth manager can have asymmetric influence over billionaires' decision-making.</p>
+            </div>
+            <div class="nodes-list">
+                <strong>Nodes:</strong>
+                <ul>
+                    <li>Lloyd Blankfein — Goldman Sachs CEO</li>
+                    <li>Ray Dalio — Bridgewater founder</li>
+                    <li>Bill Gates, Peter Thiel, George Soros</li>
+                    <li>Glenn Dubin, Jes Staley, Ray Dalio</li>
+                    <li>Michael Bloomberg, Reid Hoffman, Richard Branson</li>
+                    <li>Leon Black, Larry Summers, Robert Rubin</li>
+                </ul>
+            </div>
+            <div class="graph-container">
+                <iframe src="https://hub.graphistry.com/graph/graph.html?dataset=40c504331cc54cb1bbdc5a635567f099&type=arrow&theme=dark&info=true&play=2000&pointLabelFontSize=14&edgeOpacity=0.6&edgeCurvature=0.15&showArrows=True&strongGravity=True"></iframe>
+            </div>
+        </div>
+
+        <!-- ENTERTAINMENT VIEW -->
+        <div id="view-entertainment" class="view-content">
+            <div class="description">
+                <h2>Entertainment Network (7 Nodes)</h2>
+                <p><strong>The cultural layer.</strong> A tight, high-velocity cluster of celebrities and entertainers. Unlike academia or finance, these are connected through social proximity—parties, events, shared circles.</p>
+                <p><strong>Insurance Principle:</strong> Reputational contagion & crisis cascade. Entertainment risk moves FAST. One accusation spreads to media, social platforms, and litigation in hours. Collateral damage hits connected figures even without direct misconduct.</p>
+                <p><strong>Key insight:</strong> Being mentioned at the same party as an accused person is no longer "innocent association"—it's a pattern. Reputation insurers call this "moral hazard by proximity."</p>
+            </div>
+            <div class="nodes-list">
+                <strong>Nodes:</strong>
+                <ul>
+                    <li>Natalie Portman — Actress</li>
+                    <li>Harvey Weinstein — Producer (accused)</li>
+                    <li>Gwyneth Paltrow — Actress</li>
+                    <li>Tom Hanks — Actor</li>
+                    <li>Guy Oseary — Entertainment manager</li>
+                    <li>Sacha Baron Cohen — Comedian/Actor</li>
+                    <li>James Patterson — Author</li>
+                </ul>
+            </div>
+            <div class="graph-container">
+                <iframe src="https://hub.graphistry.com/graph/graph.html?dataset=321c4d359c1f49e4810fdd29875c535d&type=arrow&theme=dark&info=true&play=2000&pointLabelFontSize=14&edgeOpacity=0.6&edgeCurvature=0.15&showArrows=True&strongGravity=True"></iframe>
+            </div>
+        </div>
+
+        <!-- ISRAELI OFFICIALS VIEW -->
+        <div id="view-israeli" class="view-content">
+            <div class="description">
+                <h2>Israeli Officials Network (7 Nodes)</h2>
+                <p><strong>The governance layer.</strong> Political, military, and intelligence leaders spanning 20 years of governance transitions. Ehud Barak (hub: 620 documents), Benjamin Netanyahu, Ariel Sharon, Ehud Olmert, and others.</p>
+                <p><strong>Insurance Principle:</strong> Sovereign risk & political exposure for multinational insurers. Political risk insurance depends on assessing who is in power and their integrity. This network reveals dependencies across leadership transitions.</p>
+                <p><strong>Key insight:</strong> Barak received $2.5M from Wexner Foundation while advising on intelligence matters. This creates conflict-of-interest exposure for all entities that relied on his judgment.</p>
+            </div>
+            <div class="nodes-list">
+                <strong>Nodes:</strong>
+                <ul>
+                    <li>Ehud Barak — Prime Minister, Defense Minister (620 docs)</li>
+                    <li>Benjamin Netanyahu — Prime Minister</li>
+                    <li>Ariel Sharon — Prime Minister</li>
+                    <li>Ehud Olmert — Prime Minister</li>
+                    <li>Dan Meridor — Government official</li>
+                    <li>Danny Yatom — Intelligence/government</li>
+                    <li>Natalie Portman — Israeli-American cultural figure</li>
+                </ul>
+            </div>
+            <div class="graph-container">
+                <iframe src="https://hub.graphistry.com/graph/graph.html?dataset=9c6546fc331f49b0a71c0098fd3c8a0b&type=arrow&theme=dark&info=true&play=2000&pointLabelFontSize=14&edgeOpacity=0.6&edgeCurvature=0.15&showArrows=True&strongGravity=True"></iframe>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Data Source:</strong> 25,793 House Oversight Committee documents on Epstein (2019-2021)</p>
+            <p><strong>Methodology:</strong> Named Entity Recognition → co-mention graph → role classification → Graphistry visualization</p>
+            <p><strong>Last Updated:</strong> February 23, 2026</p>
+        </div>
+    </div>
+
+    <script>
+        function showView(viewName) {
+            // Hide all views
+            const views = document.querySelectorAll('.view-content');
+            views.forEach(view => view.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected view
+            document.getElementById('view-' + viewName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
